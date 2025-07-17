@@ -1,7 +1,6 @@
-// app/api/signup/route.ts
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
-import { hashPassword } from "@/lib/hash"; // your existing hash util
+import { hashPassword } from "@/lib/hash";
 
 export async function POST(request: Request) {
   const { email, password } = await request.json();
@@ -15,10 +14,18 @@ export async function POST(request: Request) {
     );
 
     return NextResponse.json({ message: "User created" });
-  } catch (err: any) {
-    console.error(err);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Signup error:", error.message);
+      return NextResponse.json(
+        { error: "Signup failed", details: error.message },
+        { status: 400 }
+      );
+    }
+
+    console.error("Unknown signup error:", error);
     return NextResponse.json(
-      { error: "Signup failed", details: err.message },
+      { error: "Unexpected error during signup" },
       { status: 400 }
     );
   }
